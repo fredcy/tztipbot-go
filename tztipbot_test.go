@@ -1,7 +1,6 @@
 package tztipbot
 
 import (
-	//"fmt"
 	"encoding/json"
 	"fmt"
 	goTezos "github.com/DefinitelyNotAGoat/go-tezos"
@@ -9,30 +8,28 @@ import (
 	"testing"
 )
 
-var RpcAddr string
+var Gt *goTezos.GoTezos
 
 func TestMain(m *testing.M) {
 	// set up shared info for tests, then run them
-	RpcAddr = os.Getenv("RPCADDR")
-	if RpcAddr == "" {
-		fmt.Printf("Error: RPCADDR must be set before running tests\n")
-		os.Exit(1)
+	var err error
+	Gt, err = ConnectService()
+	if err != nil {
+		fmt.Printf("could not connect to network: %v\n", err)
+		os.Exit(2)
 	}
+
 	code := m.Run()
 	os.Exit(code)
 }
 
 func TestHello(t *testing.T) {
-	gt, err := goTezos.NewGoTezos(RpcAddr)
-	if err != nil {
-		t.Errorf("could not connect to network: %v", err)
-	}
-
-	block, err := gt.Block.GetHead()
+	block, err := Gt.Block.GetHead()
 	if err != nil {
 		t.Errorf("count not get head: %v", err)
 	}
-	t.Log(PrettyReport(block))
+
+	t.Log(PrettyReport(block.Header))
 }
 
 //Takes an interface v and returns a pretty json string.
